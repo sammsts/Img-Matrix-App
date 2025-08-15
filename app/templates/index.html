@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Imagem ⇄ Matriz (tons de cinza)</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+  <main class="container">
+    <h1>Imagem ⇄ Matriz (tons de cinza)</h1>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash">
+          {% for m in messages %}<p>{{ m }}</p>{% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <section class="card">
+      <h2>Gerar matriz a partir de imagem</h2>
+      <form action="{{ url_for('process') }}" method="post" enctype="multipart/form-data" class="form">
+        <input type="hidden" name="action" value="encode" />
+        <label>Selecione a imagem (PNG/JPG/BMP/TIFF):
+          <input type="file" name="image_file" accept=".png,.jpg,.jpeg,.bmp,.tif,.tiff" required />
+        </label>
+        <button type="submit">Gerar matriz</button>
+      </form>
+      <p class="hint">A imagem será convertida para 8-bit (L) e a matriz salva no formato texto:
+        <code>&lt;w&gt; &lt;h&gt;</code> seguido de linhas com valores 0–255.</p>
+    </section>
+
+    <section class="card">
+      <h2>Reconstruir imagem a partir da matriz</h2>
+      <form action="{{ url_for('process') }}" method="post" enctype="multipart/form-data" class="form">
+        <input type="hidden" name="action" value="decode" />
+        <label>Selecione o arquivo de matriz (.txt/.mtx):
+          <input type="file" name="matrix_file" accept=".txt,.mtx" required />
+        </label>
+        <button type="submit">Reconstruir imagem</button>
+      </form>
+      <p class="hint">O cabeçalho deve ser <code>&lt;w&gt; &lt;h&gt;</code> e cada linha conter <code>w</code> inteiros.</p>
+    </section>
+  </main>
+</body>
+</html>

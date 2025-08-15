@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Resultado</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+  <main class="container">
+    <a href="{{ url_for('index') }}" class="back">← Voltar</a>
+    <h1>Resultado</h1>
+
+    <section class="card">
+      <h2>Pré-visualização</h2>
+      <div class="preview">
+        <img src="{{ url_for('download', filename=preview_file) }}" alt="preview" />
+      </div>
+      {% if mode == "encode" and download_matrix %}
+        <p><a class="btn" href="{{ url_for('download', filename=download_matrix) }}" download>Baixar matriz</a></p>
+      {% endif %}
+      {% if mode == "decode" and download_image %}
+        <p><a class="btn" href="{{ url_for('download', filename=download_image) }}" download>Baixar imagem</a></p>
+      {% endif %}
+    </section>
+
+    <section class="card grid">
+      <div>
+        <h2>Métricas</h2>
+        <ul class="metrics">
+          <li><strong>Largura:</strong> {{ metrics.width }}</li>
+          <li><strong>Altura:</strong> {{ metrics.height }}</li>
+          <li><strong>Mínimo:</strong> {{ metrics.min }}</li>
+          <li><strong>Máximo:</strong> {{ metrics.max }}</li>
+          <li><strong>Média:</strong> {{ "%.2f"|format(metrics.mean) }}</li>
+          <li><strong>Desvio padrão:</strong> {{ "%.2f"|format(metrics.std) }}</li>
+          <li><strong>Tempo de processamento:</strong> {{ "%.4f"|format(metrics.processing_time_sec) }} s</li>
+          <li><strong>Tamanho do arquivo:</strong> {{ metrics.file_size_bytes }} bytes</li>
+          <li><strong>Entropia:</strong> {{ "%.4f"|format(metrics.entropy_bits_per_pixel) }} bits/pixel</li>
+        </ul>
+      </div>
+      <div>
+        <h2>Histograma</h2>
+        <img src="{{ url_for('download', filename=histogram_file) }}" alt="histograma" />
+      </div>
+    </section>
+  </main>
+</body>
+</html>
