@@ -1,11 +1,15 @@
 import os
 from pathlib import Path
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for, flash
-
+import numpy as np
 from PIL import Image
 from .processing import (
     image_to_matrix_bytes,
     matrix_to_image_bytes,
+    mirror_vertical,
+    mirror_horizontal,
+    rotate_90_left,
+    rotate_90_right,
     save_histogram_png,
     ALLOWED_IMAGE_EXTS,
     ALLOWED_MATRIX_EXTS,
@@ -74,6 +78,7 @@ def process():
 
     elif action == "decode":
         file = request.files.get("matrix_file")
+        operation = request.form.get("matrix_op")
         if not file or file.filename == "":
             flash("Selecione um arquivo de matriz.")
             return redirect(url_for("index"))
@@ -84,10 +89,29 @@ def process():
             return redirect(url_for("index"))
 
         # Lê o texto
-        matrix_text = file.stream.read().decode("utf-8", errors="replace")
+        matrix_text = file.stream.read().decode("utf-8")
+
+        # Parse matriz
+        lines = [ln.strip() for ln in matrix_text.strip().splitlines() if ln.strip()]
+        header = lines[0].split()
+        width, height = int(header[0]), int(header[1])
+        arr = np.array([list(map(int, ln.split())) for ln in lines[1:]], dtype=np.uint8)
+
+        # Aplica operação
+        if operation == "mirror_v":
+            arr = mirror_vertical(arr)
+        elif operation == "mirror_h":
+            arr = mirror_horizontal(arr)
+        elif operation == "rot_left":
+            arr = rotate_90_left(arr)
+        elif operation == "rot_right":
+            arr = rotate_90_right(arr)
+
+        # Reconstrói matriz_text
+        new_matrix_text = f"{arr.shape[1]} {arr.shape[0]}\n" + "\n".join(" ".join(str(v) for v in row) for row in arr)
 
         # Reconstrói imagem
-        name, png_bytes, metrics, arr = matrix_to_image_bytes(matrix_text)
+        name, png_bytes, metrics, arr = matrix_to_image_bytes(new_matrix_text)
 
         # Salva imagem
         img_path = OUTPUT_DIR / name

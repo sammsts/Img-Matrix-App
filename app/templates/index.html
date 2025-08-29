@@ -38,6 +38,15 @@
         <label>Selecione o arquivo de matriz (.txt/.mtx):
           <input type="file" name="matrix_file" accept=".txt,.mtx" required />
         </label>
+        <label>Operação:
+          <select name="matrix_op">
+            <option value="">Nenhuma</option>
+            <option value="mirror_v">Espelhar vertical</option>
+            <option value="mirror_h">Espelhar horizontal</option>
+            <option value="rot_left">Rotacionar 90º esquerda</option>
+            <option value="rot_right">Rotacionar 90º direita</option>
+          </select>
+        </label>
         <button type="submit">Reconstruir imagem</button>
       </form>
       <p class="hint">O cabeçalho deve ser <code>&lt;w&gt; &lt;h&gt;</code> e cada linha conter <code>w</code> inteiros.</p>

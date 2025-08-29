@@ -135,3 +135,20 @@ def save_histogram_png(arr: np.ndarray, out_path: str) -> None:
     plt.tight_layout()
     plt.savefig(out_path)
     plt.close()
+
+
+def mirror_vertical(arr: np.ndarray) -> np.ndarray:
+    """Espelha verticalmente (flipud)"""
+    return np.flipud(arr)
+
+def mirror_horizontal(arr: np.ndarray) -> np.ndarray:
+    """Espelha horizontalmente (fliplr)"""
+    return np.fliplr(arr)
+
+def rotate_90_left(arr: np.ndarray) -> np.ndarray:
+    """Rotaciona 90º para a esquerda (counter-clockwise)"""
+    return np.rot90(arr, k=1)
+
+def rotate_90_right(arr: np.ndarray) -> np.ndarray:
+    """Rotaciona 90º para a direita (clockwise)"""
+    return np.rot90(arr, k=-1)
