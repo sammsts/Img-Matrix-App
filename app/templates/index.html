@@ -25,6 +25,41 @@
         <label>Selecione a imagem (PNG/JPG/BMP/TIFF):
           <input type="file" name="image_file" accept=".png,.jpg,.jpeg,.bmp,.tif,.tiff" required />
         </label>
+        <div>
+          <span>Redução de Ruído:</span><br>
+          <input type="checkbox" id="reduce_noise" name="reduce_noise" value="1" />
+        </div>
+        <label>Tamanho da Máscara:
+          <select name="mask_size" id="mask_size" disabled>
+            {% for sz in range(3, 22, 2) %}
+            <option value="{{ sz }}">{{ sz }}x{{ sz }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>Método:
+          <select name="noise_method" id="noise_method" disabled>
+            <option value="median">Mediana</option>
+            <option value="mode">Moda</option>
+          </select>
+        </label>
+        <label>Varredura:
+          <select name="scan_method" id="scan_method" disabled>
+            <option value="row">Linha</option>
+            <option value="col">Coluna</option>
+          </select>
+        </label>
+        <script>
+          const reduceNoiseCheckbox = document.getElementById('reduce_noise');
+          const maskSize = document.getElementById('mask_size');
+          const noiseMethod = document.getElementById('noise_method');
+          const scanMethod = document.getElementById('scan_method');
+          reduceNoiseCheckbox.addEventListener('change', function() {
+            const enabled = this.checked;
+            maskSize.disabled = !enabled;
+            noiseMethod.disabled = !enabled;
+            scanMethod.disabled = !enabled;
+          });
+        </script>
         <button type="submit">Gerar matriz</button>
       </form>
       <p class="hint">A imagem será convertida para 8-bit (L) e a matriz salva no formato texto:
@@ -47,7 +82,42 @@
             <option value="rot_right">Rotacionar 90º direita</option>
           </select>
         </label>
+        <div>
+          <span>Redução de Ruído:</span><br>
+          <input type="checkbox" id="reduce_noise_matrix" name="reduce_noise" value="1" />
+        </div>
+        <label>Tamanho da Máscara:
+          <select name="mask_size" id="mask_size_matrix" disabled>
+            {% for sz in range(3, 22, 2) %}
+            <option value="{{ sz }}">{{ sz }}x{{ sz }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>Método:
+          <select name="noise_method" id="noise_method_matrix" disabled>
+            <option value="median">Mediana</option>
+            <option value="mode">Moda</option>
+          </select>
+        </label>
+        <label>Varredura:
+          <select name="scan_method" id="scan_method_matrix" disabled>
+            <option value="row">Linha</option>
+            <option value="col">Coluna</option>
+          </select>
+        </label>
         <button type="submit">Reconstruir imagem</button>
+        <script>
+          const reduceNoiseMatrixCheckbox = document.getElementById('reduce_noise_matrix');
+          const maskSizeMatrix = document.getElementById('mask_size_matrix');
+          const noiseMethodMatrix = document.getElementById('noise_method_matrix');
+          const scanMethodMatrix = document.getElementById('scan_method_matrix');
+          reduceNoiseMatrixCheckbox.addEventListener('change', function() {
+            const enabled = this.checked;
+            maskSizeMatrix.disabled = !enabled;
+            noiseMethodMatrix.disabled = !enabled;
+            scanMethodMatrix.disabled = !enabled;
+          });
+        </script>
       </form>
       <p class="hint">O cabeçalho deve ser <code>&lt;w&gt; &lt;h&gt;</code> e cada linha conter <code>w</code> inteiros.</p>
     </section>

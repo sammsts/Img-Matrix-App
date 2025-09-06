@@ -1,3 +1,37 @@
+from scipy import stats
+
+def reduce_noise(arr, mask_size=3, method="median", scan="row"):
+    """
+    Aplica filtro de redução de ruído salt-and-pepper.
+    arr: matriz numpy 2D (imagem em tons de cinza)
+    mask_size: tamanho da janela (ímpar, 3-21)
+    method: 'median' ou 'mode'
+    scan: 'row' (linha) ou 'col' (coluna)
+    """
+    pad = mask_size // 2
+    padded = np.pad(arr, pad, mode='edge')
+    result = arr.copy()
+    h, w = arr.shape
+
+    if scan == "row":
+        for i in range(h):
+            for j in range(w):
+                window = padded[i:i+mask_size, j:j+mask_size]
+                vals = window.flatten()
+                if method == "median":
+                    result[i, j] = np.median(vals)
+                elif method == "mode":
+                    result[i, j] = stats.mode(vals, keepdims=True)[0][0]
+    elif scan == "col":
+        for j in range(w):
+            for i in range(h):
+                window = padded[i:i+mask_size, j:j+mask_size]
+                vals = window.flatten()
+                if method == "median":
+                    result[i, j] = np.median(vals)
+                elif method == "mode":
+                    result[i, j] = stats.mode(vals, keepdims=True)[0][0]
+    return result.astype(np.uint8)
 import io
 import time
 from typing import Tuple, Dict, Any, List

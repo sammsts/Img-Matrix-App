@@ -34,9 +34,21 @@
           <li><strong>Máximo:</strong> {{ metrics.max }}</li>
           <li><strong>Média:</strong> {{ "%.2f"|format(metrics.mean) }}</li>
           <li><strong>Desvio padrão:</strong> {{ "%.2f"|format(metrics.std) }}</li>
-          <li><strong>Tempo de processamento:</strong> {{ "%.4f"|format(metrics.processing_time_sec) }} s</li>
+          <li><strong>Tempo de processamento:</strong>
+            {% if metrics.processing_time_sec is defined %}
+              {{ "%.4f"|format(metrics.processing_time_sec) }} s
+            {% else %}
+              N/A
+            {% endif %}
+          </li>
           <li><strong>Tamanho do arquivo:</strong> {{ metrics.file_size_bytes }} bytes</li>
-          <li><strong>Entropia:</strong> {{ "%.4f"|format(metrics.entropy_bits_per_pixel) }} bits/pixel</li>
+          <li><strong>Entropia:</strong>
+            {% if metrics.entropy_bits_per_pixel is defined %}
+              {{ "%.4f"|format(metrics.entropy_bits_per_pixel) }} bits/pixel
+            {% else %}
+              N/A
+            {% endif %}
+          </li>
         </ul>
       </div>
       <div>

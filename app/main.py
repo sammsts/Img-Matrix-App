@@ -3,7 +3,7 @@ from pathlib import Path
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for, flash
 import numpy as np
 from PIL import Image
-from .processing import (
+from app.processing import (
     image_to_matrix_bytes,
     matrix_to_image_bytes,
     mirror_vertical,
@@ -13,6 +13,8 @@ from .processing import (
     save_histogram_png,
     ALLOWED_IMAGE_EXTS,
     ALLOWED_MATRIX_EXTS,
+    reduce_noise,
+    compute_metrics,
 )
 
 # Config
@@ -51,6 +53,14 @@ def process():
 
         # Gera matriz e métricas
         name, content, metrics, arr = image_to_matrix_bytes(img)
+        metrics_before = compute_metrics(arr)
+        mask_size = method = scan = None
+        if request.form.get("reduce_noise"):
+            mask_size = int(request.form.get("mask_size", 3))
+            method = request.form.get("noise_method", "median")
+            scan = request.form.get("scan_method", "row")
+            arr = reduce_noise(arr, mask_size=mask_size, method=method, scan=scan)
+        metrics_after = compute_metrics(arr)
 
         # Salva matriz
         matrix_path = OUTPUT_DIR / name
@@ -70,7 +80,11 @@ def process():
         return render_template(
             "result.html",
             mode="encode",
-            metrics=metrics,
+            metrics=metrics_after,
+            metrics_before=metrics_before,
+            mask_size=mask_size,
+            noise_method=method,
+            scan_method=scan,
             preview_file=preview_name,
             download_matrix=name,
             histogram_file=hist_name,
@@ -97,6 +111,9 @@ def process():
         width, height = int(header[0]), int(header[1])
         arr = np.array([list(map(int, ln.split())) for ln in lines[1:]], dtype=np.uint8)
 
+        metrics_before = compute_metrics(arr)
+        mask_size = method = scan = None
+
         # Aplica operação
         if operation == "mirror_v":
             arr = mirror_vertical(arr)
@@ -106,6 +123,14 @@ def process():
             arr = rotate_90_left(arr)
         elif operation == "rot_right":
             arr = rotate_90_right(arr)
+        # Redução de ruído (matriz)
+        if request.form.get("reduce_noise"):
+            mask_size = int(request.form.get("mask_size", 3))
+            method = request.form.get("noise_method", "median")
+            scan = request.form.get("scan_method", "row")
+            arr = reduce_noise(arr, mask_size=mask_size, method=method, scan=scan)
+
+        metrics_after = compute_metrics(arr)
 
         # Reconstrói matriz_text
         new_matrix_text = f"{arr.shape[1]} {arr.shape[0]}\n" + "\n".join(" ".join(str(v) for v in row) for row in arr)
@@ -126,7 +151,11 @@ def process():
         return render_template(
             "result.html",
             mode="decode",
-            metrics=metrics,
+            metrics=metrics_after,
+            metrics_before=metrics_before,
+            mask_size=mask_size,
+            noise_method=method,
+            scan_method=scan,
             preview_file=name,
             download_image=name,
             histogram_file=hist_name,
