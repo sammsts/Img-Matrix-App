@@ -161,6 +161,66 @@ def process():
             histogram_file=hist_name,
         )
 
+    elif action == "edge":
+        file = request.files.get("image_file")
+        method = request.form.get("edge_method")
+        if not file or file.filename == "":
+            flash("Selecione uma imagem.")
+            return redirect(url_for("index"))
+
+        ext = Path(file.filename).suffix.lower()
+        if ext not in ALLOWED_IMAGE_EXTS:
+            flash(f"Extensão não suportada: {ext}")
+            return redirect(url_for("index"))
+
+        img = Image.open(file.stream).convert("L")
+        arr = np.array(img)
+        metrics_before = compute_metrics(arr)
+
+        # Seleciona método de borda
+        if method == "sobel":
+            from app.processing import sobel_manual
+            edge_arr = sobel_manual(arr)
+        elif method == "prewitt":
+            from app.processing import prewitt
+            edge_arr = prewitt(arr)
+        elif method == "laplaciano":
+            from app.processing import laplaciano
+            edge_arr = laplaciano(arr)
+        elif method == "kirsch":
+            from app.processing import kirsch
+            edge_arr = kirsch(arr)
+        else:
+            flash("Método de detecção de bordas inválido.")
+            return redirect(url_for("index"))
+
+        metrics_after = compute_metrics(edge_arr)
+
+        # Salva imagem de bordas
+        out_name = f"edge_{method}_" + Path(file.filename).stem + ".png"
+        out_path = OUTPUT_DIR / out_name
+        Image.fromarray(edge_arr).save(out_path, format="PNG")
+
+        # Histograma
+        hist_name = Path(out_name).with_suffix(".hist.png").name
+        hist_path = OUTPUT_DIR / hist_name
+        save_histogram_png(edge_arr, str(hist_path))
+
+        # Salva imagem original para exibição (garante que está em output)
+        orig_name = "orig_" + Path(file.filename).stem + ".png"
+        orig_path = OUTPUT_DIR / orig_name
+        img.save(orig_path, format="PNG")
+
+        return render_template(
+            "result.html",
+            mode="edge",
+            metrics=metrics_after,
+            metrics_before=metrics_before,
+            preview_file=out_name,
+            original_file=orig_name,
+            histogram_file=hist_name,
+            edge_method=method,
+        )
     else:
         flash("Ação inválida.")
         return redirect(url_for("index"))

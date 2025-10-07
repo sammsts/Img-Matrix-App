@@ -11,6 +11,22 @@
     <a href="{{ url_for('index') }}" class="back">← Voltar</a>
     <h1>Resultado</h1>
 
+    {% if mode == "edge" %}
+    <section class="card">
+      <h2>Detecção de Bordas</h2>
+      <p><strong>Método utilizado:</strong> {{ edge_method|capitalize }}</p>
+      <div class="preview" style="display: flex; gap: 2em; align-items: center; justify-content: center;">
+        <div>
+          <span>Imagem original</span><br>
+          <img src="{{ url_for('download', filename=original_file) }}" alt="original" style="max-width: 300px; border: 1px solid #ccc;" />
+        </div>
+        <div>
+          <span>Imagem gerada</span><br>
+          <img src="{{ url_for('download', filename=preview_file) }}" alt="bordas" style="max-width: 300px; border: 1px solid #ccc;" />
+        </div>
+      </div>
+    </section>
+    {% else %}
     <section class="card">
       <h2>Pré-visualização</h2>
       <div class="preview">
@@ -23,6 +39,7 @@
         <p><a class="btn" href="{{ url_for('download', filename=download_image) }}" download>Baixar imagem</a></p>
       {% endif %}
     </section>
+    {% endif %}
 
     <section class="card grid">
       <div>

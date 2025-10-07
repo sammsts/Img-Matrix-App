@@ -1,4 +1,77 @@
+import numpy as np
 from scipy import stats
+
+# --- Detecção de Bordas ---
+def sobel_manual(arr: np.ndarray) -> np.ndarray:
+    """
+    Detecção de bordas usando operador Sobel (implementação manual).
+
+    # Explicação do código manual:
+    # 1. Define os kernels Kx e Ky para detectar bordas horizontais e verticais.
+    # 2. Converte o array para int32 para evitar overflow durante os cálculos.
+    # 3. Para cada pixel (exceto bordas), extrai uma região 3x3 ao redor.
+    # 4. Calcula gx (gradiente horizontal) e gy (vertical) multiplicando a região pelos kernels e somando.
+    # 5. Usa np.hypot(gx, gy) para obter a magnitude do gradiente (intensidade da borda).
+    # 6. Limita o valor entre 0 e 255 e armazena no pixel correspondente da saída.
+    # 7. Retorna a imagem resultante como uint8.
+    """
+    Kx = np.array([[1, 0, -1], [2, 0, -2], [1, 0, -1]], dtype=int)
+    Ky = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]], dtype=int)
+    arr = arr.astype(np.int32)
+    h, w = arr.shape
+    out = np.zeros_like(arr)
+    for i in range(1, h-1):
+        for j in range(1, w-1):
+            region = arr[i-1:i+2, j-1:j+2]
+            gx = np.sum(Kx * region)
+            gy = np.sum(Ky * region)
+            val = min(255, int(np.hypot(gx, gy)))
+            out[i, j] = val
+    return out.astype(np.uint8)
+
+def prewitt(arr: np.ndarray) -> np.ndarray:
+    """
+    Detecção de bordas usando operador Prewitt (scipy.ndimage).
+    """
+    from scipy import ndimage
+    arr = arr.astype(np.float32)
+    gx = ndimage.prewitt(arr, axis=1)
+    gy = ndimage.prewitt(arr, axis=0)
+    mag = np.hypot(gx, gy)
+    mag = np.clip(mag, 0, 255)
+    return mag.astype(np.uint8)
+
+def laplaciano(arr: np.ndarray) -> np.ndarray:
+    """
+    Detecção de bordas usando operador Laplaciano (scipy.ndimage).
+    """
+    from scipy import ndimage
+    arr = arr.astype(np.float32)
+    lap = ndimage.laplace(arr)
+    lap = np.abs(lap)
+    lap = np.clip(lap, 0, 255)
+    return lap.astype(np.uint8)
+
+def kirsch(arr: np.ndarray) -> np.ndarray:
+    """
+    Detecção de bordas usando operador Kirsch (scipy.ndimage, via máximo de convoluções).
+    """
+    from scipy import ndimage
+    arr = arr.astype(np.float32)
+    kernels = [
+        np.array([[5, 5, 5], [-3, 0, -3], [-3, -3, -3]]),
+        np.array([[5, 5, -3], [5, 0, -3], [-3, -3, -3]]),
+        np.array([[5, -3, -3], [5, 0, -3], [5, -3, -3]]),
+        np.array([[-3, -3, -3], [5, 0, -3], [5, 5, -3]]),
+        np.array([[-3, -3, -3], [-3, 0, -3], [5, 5, 5]]),
+        np.array([[-3, -3, -3], [-3, 0, 5], [-3, 5, 5]]),
+        np.array([[-3, -3, 5], [-3, 0, 5], [-3, -3, 5]]),
+        np.array([[-3, 5, 5], [-3, 0, 5], [-3, -3, -3]]),
+    ]
+    responses = [ndimage.convolve(arr, k, mode='nearest') for k in kernels]
+    kirsch = np.max(responses, axis=0)
+    kirsch = np.clip(kirsch, 0, 255)
+    return kirsch.astype(np.uint8)
 
 def reduce_noise(arr, mask_size=3, method="median", scan="row"):
     """

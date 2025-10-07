@@ -121,6 +121,23 @@
       </form>
       <p class="hint">O cabeçalho deve ser <code>&lt;w&gt; &lt;h&gt;</code> e cada linha conter <code>w</code> inteiros.</p>
     </section>
+    <hr>
+  <h2>Detecção de Bordas</h2>
+  <form action="{{ url_for('process') }}" method="post" enctype="multipart/form-data" class="form">
+    <input type="hidden" name="action" value="edge" />
+    <label>Selecione a imagem:
+      <input type="file" name="image_file" accept="image/*" required />
+    </label>
+    <label>Método:
+      <select name="edge_method" required>
+        <option value="sobel">Sobel (manual)</option>
+        <option value="prewitt">Prewitt</option>
+        <option value="laplaciano">Laplaciano</option>
+        <option value="kirsch">Kirsch</option>
+      </select>
+    </label>
+    <button type="submit">Detectar Bordas</button>
+  </form>
   </main>
 </body>
 </html>
